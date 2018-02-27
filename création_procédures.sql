@@ -137,7 +137,45 @@ create proc stopBatch
 -- enregistrement des stocks
 -- * par le magasin
 -- * ajoute une caisse
-create proc addCrate
+alter PROCEDURE addCrate @category varchar(10), @model varchar(10), @quantity smallint, @message varchar(50) output
+AS
+DECLARE @codeRet int;
+
+BEGIN TRY
+	if @category is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Field category missing';
+		END
+	else if @model = '' or @model is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Field model missing';
+		END
+	else if @quantity = 0 or @quantity is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Field quantity missing or is null';
+		END
+	else
+		BEGIN
+			UPDATE STOCK
+			SET quantity += @quantity
+			WHERE category = @category and model = @model
+
+			set @codeRet = 0;
+			set @message = 'Stock has been updated, ' + CAST(@quantity as Char(3)) + 'crates added';
+		END
+END TRY
+BEGIN CATCH
+		set @codeRet = 3;
+		Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
+		
+END CATCH
+
+RETURN @codeRet;
+
+GO
 
 
 -- suppression d'une caisse
