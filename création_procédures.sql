@@ -84,8 +84,10 @@ AS
 	END
 	else
 	BEGIN
-		update BATCH set press = @press
-			where id = @batch;
+		update BATCH set 
+			press = @press, -- on affecte une presse
+			state = 2 -- le lot passe en état 'démarré'
+			where id = @batch
 		set @message = 'le lot est démarré sur la presse ' + CAST(@press as Char(2));
 		set @retour = 0;
 	END
