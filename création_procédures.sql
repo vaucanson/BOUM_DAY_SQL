@@ -35,8 +35,17 @@ AS
 go
 
 
+
 -- vue donnant toutes les machines libres
-create view freePresses
+create view freePresses as
+select p.*
+from press p
+where p.id not in (
+	select distinct press
+	from BATCH b
+	where b.state = 2
+)
+go
 
 
 -- démarrage d'un lot :
