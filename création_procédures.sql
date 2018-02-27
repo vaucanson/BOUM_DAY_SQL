@@ -178,8 +178,28 @@ GO
 -- arrêt du lot
 -- * par le contrôleur
 -- * passage du lot en état 'arrêté' (calcul des moyennes etc.)
+alter proc stopBatch 
+						@batch smallint, -- le lot à démarrer
+						@message varchar(50) OUTPUT -- message en sortie
+AS
 
-create proc stopBatch
+	declare @retour int; 
+	set @retour = 1;
+
+	if @batch not in (select id from BATCH where state = 3)
+	BEGIN
+		set @message = 'le lot indiqué n''est pas en vérification';
+	END
+	else
+	BEGIN
+		update BATCH 
+			set state = 4
+			where id = @batch;
+		set @message = 'le lot est arrêté';
+		set @retour = 0;
+	END
+	return @retour;
+go
 
 
 -- enregistrement des stocks
