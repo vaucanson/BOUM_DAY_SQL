@@ -1,5 +1,3 @@
-
-
 --drop database BOUM_DAY
 
 
@@ -8,22 +6,25 @@
 CREATE DATABASE BOUM_DAY
 GO
 
-
-
 use BOUM_DAY;
 go
+
+create user david from login boilleau
+create user amine from login mattar
 
 --LV0
 CREATE TABLE PRESS 
 (
-id					smallint			PRIMARY KEY 			IDENTITY(1,1)
+id					smallint			PRIMARY KEY 			IDENTITY(1,1),
+active				bit,
 );
 GO
 
 CREATE TABLE MODEL
 (
 name				varchar(5)			PRIMARY KEY,
-diameter			float	NOT NULL	
+diameter			float	NOT NULL,
+active				bit,	
 );
 GO
 
@@ -37,7 +38,8 @@ GO
 
 CREATE TABLE BATCH_STATE
 (
-name				varchar(10)			PRIMARY KEY,
+id					smallint			PRIMARY KEY IDENTITY(1,1),
+name				varchar(10)
 );
 go
 
@@ -45,9 +47,9 @@ go
 CREATE TABLE BATCH
 (
 id 					smallint			PRIMARY KEY IDENTITY(1,1),
-date 				datetime NOT NULL,
+date 				smalldatetime NOT NULL,
 piecesNumber		smallint NOT NULL,
-state 				varchar(10)			FOREIGN KEY (state) REFERENCES BATCH_STATE (name),
+state 				smallint			FOREIGN KEY (state) REFERENCES BATCH_STATE (id),
 press				smallint			FOREIGN KEY (press) REFERENCES PRESS (id),
 model				varchar(5)			FOREIGN KEY (model) REFERENCES MODEL (name)
 );
@@ -72,22 +74,5 @@ bt					decimal(5,3) NOT NULL,
 bl					decimal(5,3) NOT NULL,
 batch 				smallint			FOREIGN KEY (batch) REFERENCES BATCH(id)
 )
-
-
---REMPLISSAGE DE TABLE
-
-INSERT INTO BATCH_STATE 
-VALUES ('lancé')
-GO
-INSERT BATCH_STATE 
-VALUES ('démarré')
-GO
-INSERT  BATCH_STATE 
-VALUES ('libéré')
-GO
-INSERT  BATCH_STATE 
-VALUES ('arrêté')
-GO
-
 
 

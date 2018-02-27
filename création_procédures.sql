@@ -1,4 +1,6 @@
 
+----------------PROCEDURE STOCKEES-----------------------
+
 -- vue de la table stock, renvoyant en plus un booléen disant si le stock est en-dessous du seuil autorisé
 create view stockUnderLimit as
 select 
@@ -10,11 +12,11 @@ go
 
 -- le responsable d'atelier consulte et, si besoin, lance un lot
 
--- lancement d'un lot : 
+-- lancement d'un lot : 
 -- * par le responsable d'atelier, sur la base de la consultation du stock
 -- * consiste en la création du lot avec un nombre de pièces et un modèle
 
-alter PROC initBatch 
+CREATE PROC initBatch 
 						@numberOfPiecesAsked smallint, -- le nombre de pièces demandées
 						@model varchar(5), -- le modèle
 						@message varchar(50) OUTPUT -- message en sortie
@@ -60,12 +62,12 @@ where p.id not in (
 go
 
 
--- démarrage d'un lot :
+-- démarrage d'un lot :
 -- * par le responsable de production
 -- * si une presse est libre 
 -- * affectation d'une presse au lot
 
-alter proc startBatch 
+CREATE proc startBatch 
 						@batch smallint, -- le lot à démarrer
 						@press smallint, -- la presse à affecter au lot
 						@message varchar(50) OUTPUT -- message en sortie
@@ -99,7 +101,7 @@ go
 -- * colle une étiquette sur le tapis, et dit que le lot a libéré la machine (= càd passe le lot en état 'libéré')
 
 -- à faire automatiquement dès que toutes les pièces d'un lot ont été traitées
-alter proc endBatch 
+CREATE proc endBatch 
 						@batch smallint, -- le lot à démarrer
 						@message varchar(50) OUTPUT -- message en sortie
 AS
@@ -178,7 +180,7 @@ GO
 -- arrêt du lot
 -- * par le contrôleur
 -- * passage du lot en état 'arrêté' (calcul des moyennes etc.)
-alter proc stopBatch 
+CREATE proc stopBatch 
 						@batch smallint, -- le lot à démarrer
 						@message varchar(50) OUTPUT -- message en sortie
 AS
@@ -205,7 +207,7 @@ go
 -- enregistrement des stocks
 -- * par le magasin
 -- * ajoute une caisse
-alter PROCEDURE addCrate @category varchar(10), @model varchar(10), @quantity smallint, @message varchar(50) output
+CREATE PROCEDURE addCrate @category varchar(10), @model varchar(10), @quantity smallint, @message varchar(50) output
 AS
 DECLARE @codeRet int;
 
@@ -245,20 +247,12 @@ RETURN @codeRet;
 
 GO
 
-
--- suppression d'une caisse
--- * par le magasin
--- * enlève une caisse
-create proc removeCrate
-
-
 -- Création de modèle
 -- * par le responsable d'application
 -- * crée un modèle
 CREATE PROCEDURE addModel @name varchar(5), @diameter float, @littleMin int, @midMin int, @bigMin int, @message varchar(50) output
 AS
 DECLARE @codeRet int;
-
 
 BEGIN TRY
 	if @name = '' or @name is null
@@ -289,7 +283,7 @@ BEGIN TRY
 	else
 		BEGIN
 			INSERT MODEL 
-			VALUES (@name, @diameter);
+			VALUES (@name, @diameter, 1);
 			
 			INSERT STOCK
 			VALUES ('Petit', @name, @littleMin, 0);
@@ -321,7 +315,6 @@ CREATE PROCEDURE removeModel @name varchar(5), @message varchar(50) output
 AS
 DECLARE @codeRet int;
 
-
 BEGIN TRY
 	if @name = '' or @name is null
 		BEGIN
@@ -330,11 +323,9 @@ BEGIN TRY
 		END
 	else
 		BEGIN
-			DELETE FROM STOCK
-			WHERE model = @name;
-
-			DELETE FROM MODEL
-			WHERE name = @name; 
+			UPDATE MODEL
+			SET active = 0
+			WHERE name = @name
 			
 			SET @codeRet = 1;
 			SET @message = 'The model has been successfully removed.';
@@ -374,7 +365,8 @@ CREATE PROCEDURE removePress @id smallint, @message varchar(50) output
 AS
 DECLARE @codeRet int;
 BEGIN TRY
-	DELETE FROM PRESS
+	UPDATE PRESS
+	SET active = 0
 	WHERE id = @id
 
 	set @codeRet = 0;
@@ -390,7 +382,7 @@ GO
 -- Modifie un seuil 
 -- * par le responsable d'application
 -- * modifie un seuil dans la table stock
-alter proc changeLimit
+CREATE proc changeLimit
 						@model varchar(5), -- le modèle 
 						@category varchar(5), -- la catégorie
 						@limit smallint, -- la limite à affecter
@@ -455,5 +447,3 @@ BEGIN CATCH
 		Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
 END CATCH
 GO
-
-
