@@ -1,4 +1,4 @@
---drop database BOUM_DAY
+-- drop database BOUM_DAY
 
 
 
