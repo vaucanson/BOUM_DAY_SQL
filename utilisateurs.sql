@@ -21,14 +21,6 @@
 --mdp = login
 
 
-create role applicationHeadOf;
-
--- ajoute le droit d'exécution sur la procédure stockée addModel au rôle applicationHeadOf
-grant EXECUTE on addModel to applicationHeadOf;
-
-alter role applicationHeadOf add member George;
-
-
 
 -- UTILISATEURS
 create user user_resp_app from login resp_application;
@@ -49,3 +41,11 @@ create user user_resp_qualit2 from login resp_qualité2;
 
 
 -- RÔLES
+
+create role applicationHeadOf;
+
+-- ajoute le droit d'exécution sur la procédure stockée addModel au rôle applicationHeadOf
+grant EXECUTE on addModel to applicationHeadOf;
+
+alter role applicationHeadOf add member user_resp_app;
+
