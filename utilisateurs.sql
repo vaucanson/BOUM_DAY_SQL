@@ -1,11 +1,11 @@
 
--- RÔLES
+-- RÃ”LES
 -- ************************
 -- responsable d'atelier
 -- responsable de production
--- contrôleur
+-- contrÃ´leur
 -- magasin
--- responsable de qualité
+-- responsable de qualitÃ©
 -- responsable de l'application
 -- *********************************
 
@@ -16,7 +16,7 @@
 --resp_atelier2
 --controleur1 - 2 - 3
 --magasinier1 - 2 - 3
---resp_qualité1 - 2
+--resp_qualitÃ©1 - 2
 
 --mdp = login
 
@@ -34,17 +34,17 @@ create user user_controleur3 from login controleur3;
 create user user_magasinier1 from login magasinier1;
 create user user_magasinier2 from login magasinier2;
 create user user_magasinier3 from login magasinier3;
-create user user_resp_qualit1 from login resp_qualité1;
-create user user_resp_qualit2 from login resp_qualité2;
+create user user_resp_qualit1 from login resp_qualitÃ©1;
+create user user_resp_qualit2 from login resp_qualitÃ©2;
 
 
 
 
--- RÔLES
+-- RÃ”LES
 
 create role applicationHeadOf;
 
--- ajoute le droit d'exécution sur la procédure stockée addModel au rôle applicationHeadOf
+-- ajoute le droit d'exÃ©cution sur la procÃ©dure stockÃ©e addModel au rÃ´le applicationHeadOf
 grant EXECUTE on addModel to applicationHeadOf;
 
 alter role applicationHeadOf add member user_resp_app;
