@@ -50,7 +50,7 @@ go
 
 -- vue donnant toutes les machines libres
 create view freePresses as
-select p.*
+select p.id as id
 from press p
 where p.id not in (
 	select distinct press
