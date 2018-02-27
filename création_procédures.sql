@@ -390,7 +390,47 @@ GO
 -- Modifie un seuil 
 -- * par le responsable d'application
 -- * modifie un seuil dans la table stock
-create proc changeLimit
+alter proc changeLimit
+						@model varchar(5), -- le modèle 
+						@category varchar(5), -- la catégorie
+						@limit smallint, -- la limite à affecter
+						@message varchar(50) OUTPUT -- le message de retour
+AS
+	declare @retour int;
+	set @retour = 1;
+
+	if @model is null or @model = '' or @model not in (select name from model)
+	BEGIN
+		set @message = 'le modèle doit être renseigné';
+	END
+	else if @category is null or @category = '' or @category not in (select name from CATEGORY)
+	BEGIN
+		set @message = 'la catégorie doit être renseignée';
+	END
+	else if @category is null or @category = ''
+	BEGIN
+		set @message = 'la catégorie doit être renseignée';
+	END
+	else if @limit < 0
+	BEGIN
+		set @message = 'la limite doit être positive';
+	END
+	else
+		BEGIN TRY
+			update STOCK set  
+				limit = @limit
+				where model = @model and category = @category
+			set @message = 'le seuil a bien été mis à jour'
+			set @retour = 0;
+		END TRY
+		BEGIN CATCH 
+				set @retour = 3;
+				Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
+		END CATCH
+
+	return @retour;
+
+GO
 
 
 -- purge la base de données
