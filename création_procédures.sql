@@ -65,7 +65,32 @@ go
 -- * si une presse est libre 
 -- * affectation d'une presse au lot
 
-create proc startBatch
+alter proc startBatch 
+						@batch smallint, -- le lot à démarrer
+						@press smallint, -- la presse à affecter au lot
+						@message varchar(50) OUTPUT -- message en sortie
+AS
+
+	declare @retour int; 
+	set @retour = 1;
+
+	if @press not in (select * from freePresses)
+	BEGIN
+		set @message = 'la presse indiquée n''est pas libre';
+	END
+	else if @batch not in (select id from BATCH where state = 1)
+	BEGIN
+		set @message = 'le lot indiqué n''est pas en attente de démarrage';
+	END
+	else
+	BEGIN
+		update BATCH set press = @press
+			where id = @batch;
+		set @message = 'le lot est démarré sur la presse ' + CAST(@press as Char(2));
+		set @retour = 0;
+	END
+	return @retour;
+go
 
 -- Lot fini de fabriquer
 -- * par le responsable de production, sur un lot dans l'état 'démarré'
