@@ -23,14 +23,26 @@ AS
 	declare @retour int;
 	set @retour = 1;
 
-	insert into batch (date, piecesNumber, state, press, model)
-	values (GETDATE(),
-			@numberOfPiecesAsked,
-			1, -- un lot est créé à l'état 1
-			null, -- un lot n'a pas de presse à sa création
-			@model
-	)
-
+	if @numberOfPiecesAsked is null or @numberOfPiecesAsked = 0
+	BEGIN
+		set @message = 'le nombre de pièces doit être renseigné et différent de zéro';
+	END
+	else if @model is null or @model = ''
+	BEGIN
+		set @message = 'le modèle doit être renseigné';
+	END
+	else
+	BEGIN
+		insert into batch (date, piecesNumber, state, press, model)
+		values (GETDATE(),
+				@numberOfPiecesAsked,
+				1, -- un lot est créé à l'état 1
+				null, -- un lot n'a pas de presse à sa création
+				@model
+		)
+		set @message = 'le lot a bien été créé';
+		set @retour = 0;
+	END
 	return @retour;
 go
 
@@ -62,12 +74,57 @@ create proc startBatch
 -- à faire automatiquement dès que toutes les pièces d'un lot ont été traitées
 create proc endBatch
 
-
+go
 -- saisie des mesures
 -- * par le contrôleur
 -- * crée une pièce avec les quatre mesures saisies
 
-create proc setDimensions -- par Yannick
+CREATE PROCEDURE setDimensions @ht numeric, @hl numeric, @bt numeric, @bl numeric, @idBatch smallint, @message varchar(50) output
+AS
+DECLARE @codeRet int;
+
+BEGIN TRY
+	if @ht = 0 or @ht is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Champ haut transversal manquant';
+		END
+	else if @hl = 0 or @hl is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Champ haut longitudinal manquant';
+		END
+	else if @bt = 0 or @bt is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Champ bas transversal manquant';
+		END
+	else if @bl = 0 or @bl is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Champ bas longitudinal manquant';
+		END
+	else if @idBatch = 0 or @idBatch is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Probleme identification du lot';
+		END
+	else
+		BEGIN
+			INSERT PIECE
+			VALUES(@ht, @hl, @bt, @bl, @idBatch)
+
+			set @codeRet = 0;
+			set @message = 'La piece a bien été créée';
+		END
+END TRY
+BEGIN CATCH
+	Set @message= 'erreur base de données' + ERROR_MESSAGE() ;
+	set @codeRet = 3;
+END CATCH
+	RETURN @codeRet;
+
+GO
 
 
 -- arrêt du lot
