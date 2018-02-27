@@ -255,7 +255,63 @@ create proc removeCrate
 -- Création de modèle
 -- * par le responsable d'application
 -- * crée un modèle
-create proc addModel
+CREATE PROCEDURE addModel @name varchar(5), @diameter float, @littleMin int, @midMin int, @bigMin int, @message varchar(50) output
+AS
+DECLARE @codeRet int;
+
+
+BEGIN TRY
+	if @name = '' or @name is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Enter a valid name';
+		END
+	else if @diameter = 0 or @diameter is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Enter a valid diameter';
+		END
+	else if @littleMin = 0 or @littleMin is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'littleMin : invalid value';
+		END
+	else if @midMin = 0 or @midMin is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'midMin : invalid value';
+		END
+	else if @bigMin = 0 or @bigMin is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'bigMin : invalid value';
+		END
+	else
+		BEGIN
+			INSERT MODEL 
+			VALUES (@name, @diameter);
+			
+			INSERT STOCK
+			VALUES ('Petit', @name, @littleMin, 0);
+			
+			INSERT STOCK
+			VALUES ('Moyen', @name, @midMin, 0);
+			
+			INSERT STOCK
+			VALUES ('Grand', @name, @bigMin, 0);
+			
+			SET @codeRet = 1;
+			SET @message = 'The new model has been added.';
+		END
+END TRY
+BEGIN CATCH
+	SET @codeRet = 3;
+	SET @message = 'Error : ' + ERROR_MESSAGE();
+END CATCH
+
+RETURN @codeRet;
+
+GO
 
 
 -- Suppression de modèle
