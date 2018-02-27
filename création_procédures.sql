@@ -99,9 +99,30 @@ go
 -- * colle une étiquette sur le tapis, et dit que le lot a libéré la machine (= càd passe le lot en état 'libéré')
 
 -- à faire automatiquement dès que toutes les pièces d'un lot ont été traitées
-create proc endBatch
+alter proc endBatch 
+						@batch smallint, -- le lot à démarrer
+						@message varchar(50) OUTPUT -- message en sortie
+AS
 
+	declare @retour int; 
+	set @retour = 1;
+
+	if @batch not in (select id from BATCH where state = 2)
+	BEGIN
+		set @message = 'le lot indiqué n''est pas en production';
+	END
+	else
+	BEGIN
+		update BATCH 
+			set state = 3
+			where id = @batch;
+		set @message = 'le lot est arrêté';
+		set @retour = 0;
+	END
+	return @retour;
 go
+
+
 -- saisie des mesures
 -- * par le contrôleur
 -- * crée une pièce avec les quatre mesures saisies
