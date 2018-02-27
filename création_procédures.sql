@@ -436,6 +436,24 @@ GO
 -- purge la base de données
 -- * par le responsable d'application
 -- * supprime les lots et pièces datant de plus d'un an
-create proc piecesCleanUp
+CREATE PROCEDURE pieceCleanUp @message varchar(50) output
+AS
+DECLARE @codeRet int;
+BEGIN TRY
+	DELETE FROM PIECE
+	WHERE id = (
+		SELECT PIECE.id 
+		FROM PIECE 
+		JOIN BATCH on BATCH.id = PIECE.batch
+		WHERE DATEDIFF(DAY, BATCH.date, GETDATE()) > 365)
+
+		set @codeRet = 0;
+		set @message = 'Piece have been cleaned up';
+END TRY
+BEGIN CATCH
+		set @codeRet = 3;
+		Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
+END CATCH
+GO
 
 
