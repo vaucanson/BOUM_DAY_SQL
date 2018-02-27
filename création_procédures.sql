@@ -225,12 +225,39 @@ create proc removeModel
 -- Création de presse
 -- * par le responsable d'application
 -- * crée une presse
-create proc addPress
+CREATE PROCEDURE addPress @message varchar(50) output
+AS
+DECLARE @codeRet int;
+BEGIN TRY
+	INSERT PRESS
+	DEFAULT VALUES
+	set @codeRet = 0;
+	set @message = 'A new press have been created';
+END TRY
+BEGIN CATCH
+		set @codeRet = 3;
+		Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
+END CATCH
+GO
 
 -- Suppression de presse
 -- * par le responsable d'application
 -- * supprime une presse
-create proc removePress
+CREATE PROCEDURE removePress @id smallint, @message varchar(50) output
+AS
+DECLARE @codeRet int;
+BEGIN TRY
+	DELETE FROM PRESS
+	WHERE id = @id
+
+	set @codeRet = 0;
+	set @message = 'The press number ' + CAST(@id as Char(2)) + ' have been removed';
+END TRY
+BEGIN CATCH
+		set @codeRet = 3;
+		Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
+END CATCH
+GO
 
 
 -- Modifie un seuil 
