@@ -317,7 +317,37 @@ GO
 -- Suppression de modèle
 -- * par le responsable d'application
 -- * supprime un modèle
-create proc removeModel
+CREATE PROCEDURE removeModel @name varchar(5), @message varchar(50) output
+AS
+DECLARE @codeRet int;
+
+
+BEGIN TRY
+	if @name = '' or @name is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Field name is invalid.';
+		END
+	else
+		BEGIN
+			DELETE FROM STOCK
+			WHERE model = @name;
+
+			DELETE FROM MODEL
+			WHERE name = @name; 
+			
+			SET @codeRet = 1;
+			SET @message = 'The model has been successfully removed.';
+		END
+END TRY
+BEGIN CATCH
+	SET @codeRet = 3;
+	SET @message = 'Error : ' + ERROR_MESSAGE();
+END CATCH
+
+RETURN @codeRet;
+
+GO
 
 -- Création de presse
 -- * par le responsable d'application
