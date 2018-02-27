@@ -25,13 +25,13 @@ VALUES ('Grand', +0.01, +0.1)
 GO
 
 INSERT INTO BATCH_STATE 
-VALUES ('Lancé')
+VALUES ('LancÃ©')
 INSERT BATCH_STATE 
-VALUES ('Démarré')
+VALUES ('DÃ©marrÃ©')
 INSERT  BATCH_STATE 
-VALUES ('Libéré')
+VALUES ('LibÃ©rÃ©')
 INSERT  BATCH_STATE 
-VALUES ('Arrêté')
+VALUES ('ArrÃªtÃ©')
 GO
 
 INSERT BATCH

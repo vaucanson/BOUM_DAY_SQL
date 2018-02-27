@@ -1,7 +1,7 @@
 
 ----------------PROCEDURE STOCKEES-----------------------
 
--- vue de la table stock, renvoyant en plus un booléen disant si le stock est en-dessous du seuil autorisé
+-- vue de la table stock, renvoyant en plus un boolÃ©en disant si le stock est en-dessous du seuil autorisÃ©
 create view stockUnderLimit as
 select 
 	STOCK.category, STOCK.limit, STOCK.model, STOCK.quantity,
@@ -14,11 +14,11 @@ go
 
 -- lancement d'un lot : 
 -- * par le responsable d'atelier, sur la base de la consultation du stock
--- * consiste en la création du lot avec un nombre de pièces et un modèle
+-- * consiste en la crÃ©ation du lot avec un nombre de piÃ¨ces et un modÃ¨le
 
 CREATE PROC initBatch 
-						@numberOfPiecesAsked smallint, -- le nombre de pièces demandées
-						@model varchar(5), -- le modèle
+						@numberOfPiecesAsked smallint, -- le nombre de piÃ¨ces demandÃ©es
+						@model varchar(5), -- le modÃ¨le
 						@message varchar(50) OUTPUT -- message en sortie
 AS
 
@@ -27,22 +27,22 @@ AS
 
 	if @numberOfPiecesAsked is null or @numberOfPiecesAsked = 0
 	BEGIN
-		set @message = 'le nombre de pièces doit être renseigné et différent de zéro';
+		set @message = 'le nombre de piÃ¨ces doit Ãªtre renseignÃ© et diffÃ©rent de zÃ©ro';
 	END
 	else if @model is null or @model = ''
 	BEGIN
-		set @message = 'le modèle doit être renseigné';
+		set @message = 'le modÃ¨le doit Ãªtre renseignÃ©';
 	END
 	else
 	BEGIN
 		insert into batch (date, piecesNumber, state, press, model)
 		values (GETDATE(),
 				@numberOfPiecesAsked,
-				1, -- un lot est créé à l'état 1
-				null, -- un lot n'a pas de presse à sa création
+				1, -- un lot est crÃ©Ã© Ã  l'Ã©tat 1
+				null, -- un lot n'a pas de presse Ã  sa crÃ©ation
 				@model
 		)
-		set @message = 'le lot a bien été créé';
+		set @message = 'le lot a bien Ã©tÃ© crÃ©Ã©';
 		set @retour = 0;
 	END
 	return @retour;
@@ -62,14 +62,14 @@ where p.id not in (
 go
 
 
--- démarrage d'un lot :
+-- dÃ©marrage d'un lot :
 -- * par le responsable de production
 -- * si une presse est libre 
 -- * affectation d'une presse au lot
 
 CREATE proc startBatch 
-						@batch smallint, -- le lot à démarrer
-						@press smallint, -- la presse à affecter au lot
+						@batch smallint, -- le lot Ã  dÃ©marrer
+						@press smallint, -- la presse Ã  affecter au lot
 						@message varchar(50) OUTPUT -- message en sortie
 AS
 
@@ -78,31 +78,31 @@ AS
 
 	if @press not in (select * from freePresses)
 	BEGIN
-		set @message = 'la presse indiquée n''est pas libre';
+		set @message = 'la presse indiquÃ©e n''est pas libre';
 	END
 	else if @batch not in (select id from BATCH where state = 1)
 	BEGIN
-		set @message = 'le lot indiqué n''est pas en attente de démarrage';
+		set @message = 'le lot indiquÃ© n''est pas en attente de dÃ©marrage';
 	END
 	else
 	BEGIN
 		update BATCH set 
 			press = @press, -- on affecte une presse
-			state = 2 -- le lot passe en état 'démarré'
+			state = 2 -- le lot passe en Ã©tat 'dÃ©marrÃ©'
 			where id = @batch
-		set @message = 'le lot est démarré sur la presse ' + CAST(@press as Char(2));
+		set @message = 'le lot est dÃ©marrÃ© sur la presse ' + CAST(@press as Char(2));
 		set @retour = 0;
 	END
 	return @retour;
 go
 
 -- Lot fini de fabriquer
--- * par le responsable de production, sur un lot dans l'état 'démarré'
--- * colle une étiquette sur le tapis, et dit que le lot a libéré la machine (= càd passe le lot en état 'libéré')
+-- * par le responsable de production, sur un lot dans l'Ã©tat 'dÃ©marrÃ©'
+-- * colle une Ã©tiquette sur le tapis, et dit que le lot a libÃ©rÃ© la machine (= cÃ d passe le lot en Ã©tat 'libÃ©rÃ©')
 
--- à faire automatiquement dès que toutes les pièces d'un lot ont été traitées
+-- Ã  faire automatiquement dÃ¨s que toutes les piÃ¨ces d'un lot ont Ã©tÃ© traitÃ©es
 CREATE proc endBatch 
-						@batch smallint, -- le lot à démarrer
+						@batch smallint, -- le lot Ã  dÃ©marrer
 						@message varchar(50) OUTPUT -- message en sortie
 AS
 
@@ -111,14 +111,14 @@ AS
 
 	if @batch not in (select id from BATCH where state = 2)
 	BEGIN
-		set @message = 'le lot indiqué n''est pas en production';
+		set @message = 'le lot indiquÃ© n''est pas en production';
 	END
 	else
 	BEGIN
 		update BATCH 
 			set state = 3
 			where id = @batch;
-		set @message = 'le lot est arrêté';
+		set @message = 'le lot est arrÃªtÃ©';
 		set @retour = 0;
 	END
 	return @retour;
@@ -126,8 +126,8 @@ go
 
 
 -- saisie des mesures
--- * par le contrôleur
--- * crée une pièce avec les quatre mesures saisies
+-- * par le contrÃ´leur
+-- * crÃ©e une piÃ¨ce avec les quatre mesures saisies
 
 CREATE PROCEDURE setDimensions @ht numeric, @hl numeric, @bt numeric, @bl numeric, @idBatch smallint, @message varchar(50) output
 AS
@@ -165,11 +165,11 @@ BEGIN TRY
 			VALUES(@ht, @hl, @bt, @bl, @idBatch)
 
 			set @codeRet = 0;
-			set @message = 'La piece a bien été créée';
+			set @message = 'La piece a bien Ã©tÃ© crÃ©Ã©e';
 		END
 END TRY
 BEGIN CATCH
-	Set @message= 'erreur base de données' + ERROR_MESSAGE() ;
+	Set @message= 'erreur base de donnÃ©es' + ERROR_MESSAGE() ;
 	set @codeRet = 3;
 END CATCH
 	RETURN @codeRet;
@@ -177,11 +177,11 @@ END CATCH
 GO
 
 
--- arrêt du lot
--- * par le contrôleur
--- * passage du lot en état 'arrêté' (calcul des moyennes etc.)
+-- arrÃªt du lot
+-- * par le contrÃ´leur
+-- * passage du lot en Ã©tat 'arrÃªtÃ©' (calcul des moyennes etc.)
 CREATE proc stopBatch 
-						@batch smallint, -- le lot à démarrer
+						@batch smallint, -- le lot Ã  dÃ©marrer
 						@message varchar(50) OUTPUT -- message en sortie
 AS
 
@@ -190,14 +190,14 @@ AS
 
 	if @batch not in (select id from BATCH where state = 3)
 	BEGIN
-		set @message = 'le lot indiqué n''est pas en vérification';
+		set @message = 'le lot indiquÃ© n''est pas en vÃ©rification';
 	END
 	else
 	BEGIN
 		update BATCH 
 			set state = 4
 			where id = @batch;
-		set @message = 'le lot est arrêté';
+		set @message = 'le lot est arrÃªtÃ©';
 		set @retour = 0;
 	END
 	return @retour;
@@ -239,7 +239,7 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 		set @codeRet = 3;
-		Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
+		Set @message= 'erreur base de donnÃ©es : ' + ERROR_MESSAGE() ;
 		
 END CATCH
 
@@ -247,9 +247,9 @@ RETURN @codeRet;
 
 GO
 
--- Création de modèle
+-- CrÃ©ation de modÃ¨le
 -- * par le responsable d'application
--- * crée un modèle
+-- * crÃ©e un modÃ¨le
 CREATE PROCEDURE addModel @name varchar(5), @diameter float, @littleMin int, @midMin int, @bigMin int, @message varchar(50) output
 AS
 DECLARE @codeRet int;
@@ -308,9 +308,9 @@ RETURN @codeRet;
 GO
 
 
--- Suppression de modèle
+-- Suppression de modÃ¨le
 -- * par le responsable d'application
--- * supprime un modèle
+-- * supprime un modÃ¨le
 CREATE PROCEDURE removeModel @name varchar(5), @message varchar(50) output
 AS
 DECLARE @codeRet int;
@@ -340,9 +340,9 @@ RETURN @codeRet;
 
 GO
 
--- Création de presse
+-- CrÃ©ation de presse
 -- * par le responsable d'application
--- * crée une presse
+-- * crÃ©e une presse
 CREATE PROCEDURE addPress @message varchar(50) output
 AS
 DECLARE @codeRet int;
@@ -354,7 +354,7 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 		set @codeRet = 3;
-		Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
+		Set @message= 'erreur base de donnÃ©es : ' + ERROR_MESSAGE() ;
 END CATCH
 GO
 
@@ -374,7 +374,7 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 		set @codeRet = 3;
-		Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
+		Set @message= 'erreur base de donnÃ©es : ' + ERROR_MESSAGE() ;
 END CATCH
 GO
 
@@ -383,9 +383,9 @@ GO
 -- * par le responsable d'application
 -- * modifie un seuil dans la table stock
 CREATE proc changeLimit
-						@model varchar(5), -- le modèle 
-						@category varchar(5), -- la catégorie
-						@limit smallint, -- la limite à affecter
+						@model varchar(5), -- le modÃ¨le 
+						@category varchar(5), -- la catÃ©gorie
+						@limit smallint, -- la limite Ã  affecter
 						@message varchar(50) OUTPUT -- le message de retour
 AS
 	declare @retour int;
@@ -393,31 +393,31 @@ AS
 
 	if @model is null or @model = '' or @model not in (select name from model)
 	BEGIN
-		set @message = 'le modèle doit être renseigné';
+		set @message = 'le modÃ¨le doit Ãªtre renseignÃ©';
 	END
 	else if @category is null or @category = '' or @category not in (select name from CATEGORY)
 	BEGIN
-		set @message = 'la catégorie doit être renseignée';
+		set @message = 'la catÃ©gorie doit Ãªtre renseignÃ©e';
 	END
 	else if @category is null or @category = ''
 	BEGIN
-		set @message = 'la catégorie doit être renseignée';
+		set @message = 'la catÃ©gorie doit Ãªtre renseignÃ©e';
 	END
 	else if @limit < 0
 	BEGIN
-		set @message = 'la limite doit être positive';
+		set @message = 'la limite doit Ãªtre positive';
 	END
 	else
 		BEGIN TRY
 			update STOCK set  
 				limit = @limit
 				where model = @model and category = @category
-			set @message = 'le seuil a bien été mis à jour'
+			set @message = 'le seuil a bien Ã©tÃ© mis Ã  jour'
 			set @retour = 0;
 		END TRY
 		BEGIN CATCH 
 				set @retour = 3;
-				Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
+				Set @message= 'erreur base de donnÃ©es : ' + ERROR_MESSAGE() ;
 		END CATCH
 
 	return @retour;
@@ -425,9 +425,9 @@ AS
 GO
 
 
--- purge la base de données
+-- purge la base de donnÃ©es
 -- * par le responsable d'application
--- * supprime les lots et pièces datant de plus d'un an
+-- * supprime les lots et piÃ¨ces datant de plus d'un an
 CREATE PROCEDURE pieceCleanUp @message varchar(50) output
 AS
 DECLARE @codeRet int;
@@ -444,6 +444,6 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 		set @codeRet = 3;
-		Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
+		Set @message= 'erreur base de donnÃ©es : ' + ERROR_MESSAGE() ;
 END CATCH
 GO
