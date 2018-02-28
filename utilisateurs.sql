@@ -1,14 +1,5 @@
 
---resp_application
---resp_production1
---resp_production2
---resp_atelier1
---resp_atelier2
---controleur1 - 2 - 3
---magasinier1 - 2 - 3
---resp_qualité1 - 2
-
---mdp = login
+--mdp des utilisateurs = login
 
 
 -- CRÉATION DES UTILISATEURS
