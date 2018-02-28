@@ -35,6 +35,22 @@ create role controller; -- le contrôleur
 create role storekeeper; -- le magasinier
 create role qualityHeadOf; -- le responsable de la qualité
 
+-- AFFECTATIONS DES DROITS AUX RÔLES
+grant EXECUTE on stockUnderLimit to workshopHeadOf;
+grant EXECUTE on initBatch to applicationHeadOf;
+grant EXECUTE on freePresses to productionHeadOf;
+grant EXECUTE on startBatch to productionHeadOf;
+grant EXECUTE on endBatch to productionHeadOf;
+grant EXECUTE on setDimensions to controller;
+grant EXECUTE on stopBatch to controller;
+grant EXECUTE on addCrate to storekeeper;
+grant EXECUTE on addModel to applicationHeadOf;
+grant EXECUTE on removeModel to applicationHeadOf;
+grant EXECUTE on addPress to applicationHeadOf;
+grant EXECUTE on removePress to applicationHeadOf;
+grant EXECUTE on changeLimit to applicationHeadOf;
+grant EXECUTE on pieceCleanUp to applicationHeadOf;
+
 -- AFFECTATION DES USERS AUX RÔLES
 alter role applicationHeadOf add member user_resp_app;
 alter role productionHeadOf add member user_resp_prod1;
@@ -49,8 +65,5 @@ alter role storekeeper add member user_magasinier2;
 alter role storekeeper add member user_magasinier3;
 alter role qualityHeadOf add member user_resp_qualit1;
 alter role qualityHeadOf add member user_resp_qualit2;
-
--- ajoute le droit d'exécution sur la procédure stockée addModel au rôle applicationHeadOf
-grant EXECUTE on addModel to applicationHeadOf;
 
 
