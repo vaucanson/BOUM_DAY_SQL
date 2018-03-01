@@ -3,7 +3,7 @@
 
 
 -- CRÉATION DES UTILISATEURS
-create user user_resp_app from login resp_application;
+create user user_resp_app from login resp_appli;
 create user user_resp_prod1 from login resp_production1;
 create user user_resp_prod2 from login resp_production2;
 create user user_resp_atel1 from login resp_atelier1;
@@ -27,9 +27,9 @@ create role storekeeper; -- le magasinier
 create role qualityHeadOf; -- le responsable de la qualité
 
 -- AFFECTATIONS DES DROITS AUX RÔLES
-grant EXECUTE on stockUnderLimit to workshopHeadOf;
+grant SELECT on stockUnderLimit to workshopHeadOf;
 grant EXECUTE on initBatch to applicationHeadOf;
-grant EXECUTE on freePresses to productionHeadOf;
+grant SELECT on freePresses to productionHeadOf;
 grant EXECUTE on startBatch to productionHeadOf;
 grant EXECUTE on endBatch to productionHeadOf;
 grant EXECUTE on setDimensions to controller;
