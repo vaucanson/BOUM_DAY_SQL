@@ -683,3 +683,15 @@ BEGIN CATCH
 END CATCH
 
 GO
+
+
+-- Table de tous les rôles. Pour chaque rĉole, renvoie 1 si l'utilisateur courant appartient à ce rôle, 0 sinon
+create view getRoles as
+select
+case when (IS_ROLEMEMBER ('applicationHeadOf') = 1)  then 1 else 0 end as applicationHeadOf,
+case when (IS_ROLEMEMBER ('productionHeadOf') = 1)  then 1 else 0 end as productionHeadOf,
+case when (IS_ROLEMEMBER ('workshopHeadOf') = 1)  then 1 else 0 end as workshopHeadOf,
+case when (IS_ROLEMEMBER ('controller') = 1)  then 1 else 0 end as controller,
+case when (IS_ROLEMEMBER ('storeKeeper') = 1)  then 1 else 0 end as storeKeeper,
+case when (IS_ROLEMEMBER ('qualityHeadOf') = 1)  then 1 else 0 end as qualityHeadOf
+go
