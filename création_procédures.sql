@@ -285,16 +285,28 @@ DECLARE @codeRet int;
 
 BEGIN TRANSACTION 
 	BEGIN TRY
-		if @category is null or @category = '' or @category not in (select distinct name from CATEGORY)
+		if @category is null or @category = ''
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Le champ catégorie est incorrect';
+				set @message = 'Le champ catégorie doit être renseigné';
 				ROLLBACK TRANSACTION
 			END
-		else if @model = '' or @model is null or @model not in (select distinct name from model)
+		else if @category not in (select distinct name from CATEGORY)
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Le champ modèle est incorrect';
+				set @message = 'la catégorie '+ @category +' n''existe pas';
+				ROLLBACK TRANSACTION
+			END
+		else if @model = '' or @model is null
+			BEGIN
+				set @codeRet = 1;
+				set @message = 'Le champ modèle doit être renseigné';
+				ROLLBACK TRANSACTION
+			END
+		else if @model not in (select distinct name from model)
+			BEGIN
+				set @codeRet = 1;
+				set @message = 'Le modèle ' + @model + ' n''existe pas';
 				ROLLBACK TRANSACTION
 			END
 		else if @quantity = 0 or @quantity is null
@@ -336,13 +348,25 @@ BEGIN TRANSACTION
 		if @category is null or @category = ''
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Le champ catégorie est incorrect';
+				set @message = 'Le champ catégorie doit être renseigné';
+				ROLLBACK TRANSACTION
+			END
+		else if @category not in (select distinct name from CATEGORY)
+			BEGIN
+				set @codeRet = 1;
+				set @message = 'la catégorie '+ @category +' n''existe pas';
 				ROLLBACK TRANSACTION
 			END
 		else if @model = '' or @model is null
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Le champ modèle est incorrect';
+				set @message = 'Le champ modèle doit être renseigné';
+				ROLLBACK TRANSACTION
+			END
+		else if @model not in (select distinct name from model)
+			BEGIN
+				set @codeRet = 1;
+				set @message = 'Le modèle ' + @model + ' n''existe pas';
 				ROLLBACK TRANSACTION
 			END
 		else if @quantity = 0 or @quantity is null
@@ -352,7 +376,6 @@ BEGIN TRANSACTION
 				ROLLBACK TRANSACTION
 			END
 		else
-			BEGIN
 				UPDATE STOCK
 				SET quantity -= @quantity
 				WHERE category = @category and model = @model
@@ -458,6 +481,12 @@ BEGIN TRANSACTION
 				set @message = 'Le champ nom est incorrect.';
 				ROLLBACK TRANSACTION
 			END
+		else if @name not in (select distinct name from model)
+			BEGIN
+				set @codeRet = 1;
+				set @message = 'le nom ' + @name + ' n''existe pas';
+				ROLLBACK TRANSACTION
+			END
 		else
 			BEGIN
 				UPDATE MODEL
@@ -531,21 +560,30 @@ AS
 	declare @codeRet int;
 
 BEGIN TRY
-	if @model is null or @model = '' or @model not in (select name from model)
-	BEGIN
-		set @message = 'Le modèle doit être renseigné';
-		set @codeRet = 1;
-	END
-	else if @category is null or @category = '' or @category not in (select name from CATEGORY)
-	BEGIN
-		set @message = 'La catégorie doit être renseignée';
-		set @codeRet = 1;
-	END
-	else if @category is null or @category = ''
-	BEGIN
-		set @message = 'La catégorie doit être renseignée';
-		set @codeRet = 1;
-	END
+	if @category is null or @category = ''
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Le champ catégorie doit être renseigné';
+			ROLLBACK TRANSACTION
+		END
+	else if @category not in (select distinct name from CATEGORY)
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'la catégorie '+ @category +' n''existe pas';
+			ROLLBACK TRANSACTION
+		END
+	else if @model = '' or @model is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Le champ modèle doit être renseigné';
+			ROLLBACK TRANSACTION
+		END
+	else if @model not in (select distinct name from model)
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Le modèle ' + @model + ' n''existe pas';
+			ROLLBACK TRANSACTION
+		END
 	else if @limit < 0
 	BEGIN
 		set @message = 'La limite doit être positive';
