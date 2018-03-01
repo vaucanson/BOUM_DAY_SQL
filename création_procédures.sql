@@ -23,13 +23,12 @@ go
 -- * par le responsable d'atelier, sur la base de la consultation du stock
 -- * consiste en la création du lot avec un nombre de pièces et un modèle
 
-CREATE PROCEDURE initBatch 
+ALTER PROCEDURE initBatch 
 						@numberOfPiecesAsked smallint, -- le nombre de pièces demandées
 						@model varchar(5), -- le modèle
 						@message varchar(50) OUTPUT -- message en sortie
 AS
 	declare @codeRet int;
-
 	BEGIN
 		BEGIN TRY
 			BEGIN TRANSACTION
@@ -43,6 +42,12 @@ AS
 					BEGIN
 						set @codeRet = 1;
 						set @message = 'Le modèle doit être renseigné';
+						ROLLBACK TRANSACTION;
+					END
+				else if @model not in (select distinct name from model)
+					BEGIN
+						set @codeRet = 1;
+						set @message = 'Le modèle ' + @model + ' n''existe pas !';
 						ROLLBACK TRANSACTION;
 					END
 				else
@@ -65,9 +70,7 @@ AS
 				ROLLBACK TRANSACTION
 			END CATCH
 		END
-
 return @codeRet;
-
 GO
 
 
@@ -280,15 +283,15 @@ CREATE PROCEDURE addCrate @category varchar(10), @model varchar(10), @quantity s
 AS
 DECLARE @codeRet int;
 
-BEGIN TRANSACTION
+BEGIN TRANSACTION 
 	BEGIN TRY
-		if @category is null or @category = ''
+		if @category is null or @category = '' or @category not in (select distinct name from CATEGORY)
 			BEGIN
 				set @codeRet = 1;
 				set @message = 'Le champ catégorie est incorrect';
 				ROLLBACK TRANSACTION
 			END
-		else if @model = '' or @model is null
+		else if @model = '' or @model is null or @model not in (select distinct name from model)
 			BEGIN
 				set @codeRet = 1;
 				set @message = 'Le champ modèle est incorrect';
