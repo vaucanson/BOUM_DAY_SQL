@@ -4,10 +4,10 @@
 -- vue de la table stock, renvoyant en plus un booléen disant si le stock est en-dessous du seuil autorisé
 create view stockUnderLimit as
 select 
-	STOCK.category, 
-	STOCK.limit, 
 	STOCK.model, 
+	STOCK.category,
 	STOCK.quantity,
+	STOCK.limit, 
 	case when (stock.quantity <= stock.limit) then 
 			1 
 		else 
