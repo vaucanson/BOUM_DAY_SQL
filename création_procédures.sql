@@ -182,8 +182,9 @@ go
 -- saisie des mesures
 -- * par le contrôleur
 -- * crée une pièce avec les quatre mesures saisies
+-- * et renvoie l'id de la pièce nouvellement créée
 
-CREATE PROCEDURE setDimensions @ht numeric, @hl numeric, @bt numeric, @bl numeric, @idBatch smallint, @message varchar(50) output
+alter PROCEDURE setDimensions @ht numeric, @hl numeric, @bt numeric, @bl numeric, @idBatch smallint, @message varchar(50) output, @newId int output
 AS
 DECLARE @codeRet int;
 
@@ -221,12 +222,19 @@ BEGIN TRANSACTION
 			END
 		else
 			BEGIN
-				INSERT PIECE
-				VALUES(@ht, @hl, @bt, @bl, @idBatch)
+				-- table temporaire servant à récupérer le retour de l'insert
+				declare @tmpTable table (id int); 
 
+				INSERT PIECE
+				output inserted.id into @tmpTable
+				VALUES(@ht, @hl, @bt, @bl, @idBatch);
+				
 				set @codeRet = 0;
 				set @message = 'La piece a bien été créée';
 				COMMIT TRANSACTION
+
+				-- on affecte à @newId notre id retourné par l'insert
+				set @newId = (select id from @tmpTable);
 			END
 	END TRY
 	BEGIN CATCH
