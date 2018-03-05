@@ -76,7 +76,7 @@ GO
 
 
 -- vue donnant toutes les machines libres
-CREATE view freePresses as
+alter view freePresses as
 select p.id as id
 from press p
 where p.id not in (
@@ -84,7 +84,11 @@ where p.id not in (
 	from BATCH b
 	where b.state = 2
 )
+and p.active = 1;
 go
+
+
+-- vue de toutes les presses
 
 
 -- démarrage d'un lot :

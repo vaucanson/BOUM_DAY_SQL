@@ -23,10 +23,12 @@ create role applicationHeadOf; -- le responsable d'application
 create role productionHeadOf; -- le responsable de production
 create role workshopHeadOf; -- le responsable d'atelier
 create role controller; -- le contrôleur
-create role storekeeper; -- le magasinier
+create role storeKeeper; -- le magasinier
 create role qualityHeadOf; -- le responsable de la qualité
+create role everyBody;
 
 -- AFFECTATIONS DES DROITS AUX RÔLES
+grant SELECT on getRoles to everyBody;
 grant SELECT on stockUnderLimit to workshopHeadOf;
 grant EXECUTE on initBatch to applicationHeadOf;
 grant SELECT on freePresses to productionHeadOf;
@@ -34,7 +36,7 @@ grant EXECUTE on startBatch to productionHeadOf;
 grant EXECUTE on endBatch to productionHeadOf;
 grant EXECUTE on setDimensions to controller;
 grant EXECUTE on stopBatch to controller;
-grant EXECUTE on addCrate to storekeeper;
+grant EXECUTE on addCrate to storeKeeper;
 grant EXECUTE on addModel to applicationHeadOf;
 grant EXECUTE on removeModel to applicationHeadOf;
 grant EXECUTE on addPress to applicationHeadOf;
@@ -51,10 +53,26 @@ alter role workshopHeadOf add member user_resp_atel2;
 alter role controller add member user_controleur1;
 alter role controller add member user_controleur2;
 alter role controller add member user_controleur3;
-alter role storekeeper add member user_magasinier1;
-alter role storekeeper add member user_magasinier2;
-alter role storekeeper add member user_magasinier3;
+alter role storeKeeper add member user_magasinier1;
+alter role storeKeeper add member user_magasinier2;
+alter role storeKeeper add member user_magasinier3;
 alter role qualityHeadOf add member user_resp_qualit1;
 alter role qualityHeadOf add member user_resp_qualit2;
 
+-- TOUT LE MONDE A LE RÔLE EVERYBODY
+alter role everyBody add member user_resp_app;
+alter role everyBody add member user_resp_prod1;
+alter role everyBody add member user_resp_prod2;
+alter role everyBody add member user_resp_atel1;
+alter role everyBody add member user_resp_atel2;
+alter role everyBody add member user_controleur1;
+alter role everyBody add member user_controleur2;
+alter role everyBody add member user_controleur3;
+alter role everyBody add member user_magasinier1;
+alter role everyBody add member user_magasinier2;
+alter role everyBody add member user_magasinier3;
+alter role everyBody add member user_resp_qualit1;
+alter role everyBody add member user_resp_qualit2;
 
+
+-- POUR NOS TESTS
