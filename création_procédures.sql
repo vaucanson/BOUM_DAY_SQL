@@ -8,7 +8,7 @@ select
 	STOCK.category,
 	STOCK.quantity,
 	STOCK.limit, 
-	case when (stock.quantity <= stock.limit) then 
+	case when (stock.quantity < stock.limit) then 
 			1 
 		else 
 			0 
@@ -697,7 +697,7 @@ END CATCH
 GO
 
 
--- Table de tous les rôles. Pour chaque rĉole, renvoie 1 si l'utilisateur courant appartient à ce rôle, 0 sinon
+-- Table de tous les rôles. Pour chaque rôle, renvoie 1 si l'utilisateur courant appartient à ce rôle, 0 sinon
 create view getRoles as
 select
 case when (IS_ROLEMEMBER ('applicationHeadOf') = 1)  then 1 else 0 end as applicationHeadOf,
