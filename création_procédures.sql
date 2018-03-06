@@ -8,7 +8,7 @@ select
 	STOCK.category,
 	STOCK.quantity,
 	STOCK.limit, 
-	case when (stock.quantity <= stock.limit) then 
+	case when (stock.quantity < stock.limit) then 
 			1 
 		else 
 			0 
