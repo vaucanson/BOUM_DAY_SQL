@@ -239,7 +239,7 @@ GO
 -- arrêt du lot
 -- * par le contrôleur
 -- * passage du lot en état 'arrêté' (calcul des moyennes etc.)
-CREATE proc stopBatch 
+alter proc stopBatch 
 						@batch smallint, -- le lot à démarrer
 						@message varchar(50) OUTPUT -- message en sortie
 AS
@@ -482,20 +482,29 @@ GO
 -- Création de presse
 -- * par le responsable d'application
 -- * crée une presse
-CREATE PROCEDURE addPress @message varchar(50) output
+CREATE PROCEDURE [dbo].[addPress] @message varchar(50) output, @id int output
 AS
-DECLARE @codeRet int;
-BEGIN TRANSACTION
+DECLARE @codeRet int=0;
+	
 	BEGIN TRY
+		BEGIN TRANSACTION
 		INSERT PRESS
-		DEFAULT VALUES
+		VALUES (1);
+
+		select @id=max(id)
+		from press;
+
 		set @codeRet = 0;
 		set @message = 'Une nouvelle presse a été créée';
+		commit;
 	END TRY
 	BEGIN CATCH
 			set @codeRet = 3;
 			Set @message= 'Erreur base de données : ' + ERROR_MESSAGE() ;
+			rollback;
 	END CATCH
+	return @codeRet;
+
 GO
 
 -- Suppression de presse
