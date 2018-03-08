@@ -90,7 +90,7 @@ AS
 declare @codeRet int; 
 BEGIN TRANSACTION
 	BEGIN TRY
-		if @press not in (select * from freePresses)
+		if @press not in (select * from nonBusyPresses)
 			BEGIN
 				set @message = 'la presse indiquée n''est pas libre';
 				set @codeRet = 1;
