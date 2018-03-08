@@ -28,19 +28,19 @@ create role qualityHeadOf; -- le responsable de la qualité
 
 -- AFFECTATIONS DES DROITS AUX RÔLES
 grant SELECT on stockUnderLimit to workshopHeadOf;
-grant EXECUTE on initBatch to applicationHeadOf;
-grant SELECT on freePresses to productionHeadOf;
-grant EXECUTE on startBatch to productionHeadOf;
-grant EXECUTE on endBatch to productionHeadOf;
-grant EXECUTE on setDimensions to controller;
-grant EXECUTE on stopBatch to controller;
+grant EXECUTE on setBatchStateOne to applicationHeadOf;
+grant SELECT on nonBusyPresses to productionHeadOf;
+grant EXECUTE on setBatchStateTwo to productionHeadOf;
+grant EXECUTE on setBatchStateThree to productionHeadOf;
+grant EXECUTE on createPiece to controller;
+grant EXECUTE on setBatchStateFour to controller;
 grant EXECUTE on addCrate to storekeeper;
 grant EXECUTE on addModel to applicationHeadOf;
 grant EXECUTE on removeModel to applicationHeadOf;
 grant EXECUTE on addPress to applicationHeadOf;
 grant EXECUTE on removePress to applicationHeadOf;
 grant EXECUTE on changeLimit to applicationHeadOf;
-grant EXECUTE on pieceCleanUp to applicationHeadOf;
+grant EXECUTE on piecesPurge to applicationHeadOf;
 
 -- AFFECTATION DES USERS AUX RÔLES
 alter role applicationHeadOf add member user_resp_app;

@@ -1,6 +1,9 @@
 
 ----------------PROCEDURE STOCKEES-----------------------
 
+--use BOUM_DAY
+--GO
+
 -- vue de la table stock, renvoyant en plus un booléen disant si le stock est en-dessous du seuil autorisé
 create view stockUnderLimit as
 select 
@@ -23,7 +26,7 @@ go
 -- * par le responsable d'atelier, sur la base de la consultation du stock
 -- * consiste en la création du lot avec un nombre de pièces et un modèle
 
-ALTER PROCEDURE initBatch 
+CREATE PROCEDURE setBatchStateOne 
 						@numberOfPiecesAsked smallint, -- le nombre de pièces demandées
 						@model varchar(5), -- le modèle
 						@message varchar(50) OUTPUT -- message en sortie
@@ -73,26 +76,12 @@ AS
 return @codeRet;
 GO
 
-
-
--- vue donnant toutes les machines libres
-CREATE view freePresses as
-select p.id as id
-from press p
-where p.id not in (
-	select distinct press
-	from BATCH b
-	where b.state = 2
-)
-go
-
-
 -- démarrage d'un lot :
 -- * par le responsable de production
 -- * si une presse est libre 
 -- * affectation d'une presse au lot
 
-CREATE PROCEDURE startBatch 
+CREATE PROCEDURE setBatchStateTwo 
 						@batch smallint, -- le lot à démarrer
 						@press smallint, -- la presse à affecter au lot
 						@message varchar(50) OUTPUT -- message en sortie
@@ -141,7 +130,7 @@ GO
 -- * colle une étiquette sur le tapis, et dit que le lot a libéré la machine (= càd passe le lot en état 'libéré')
 
 -- à faire automatiquement dès que toutes les pièces d'un lot ont été traitées
-CREATE PROCEDURE endBatch 
+CREATE PROCEDURE setBatchStateThree 
 						@batch smallint, -- le lot à démarrer
 						@message varchar(50) OUTPUT -- message en sortie
 AS
@@ -175,11 +164,61 @@ return @codeRet;
 go
 
 
+-- arrêt du lot
+-- * par le contrôleur
+-- * passage du lot en état 'arrêté' (calcul des moyennes etc.)
+CREATE proc setBatchStateFour 
+						@batch smallint, -- le lot à démarrer
+						@message varchar(50) OUTPUT -- message en sortie
+AS
+
+	declare @codeRet int; 
+
+BEGIN TRANSACTION
+	BEGIN TRY
+		if @batch not in (select id from BATCH where state = 3)
+		BEGIN
+			set @message = 'le lot indiqué n''est pas en vérification';
+			set @codeRet = 1;
+			ROLLBACK TRANSACTION
+		END
+		else
+		BEGIN
+			UPDATE BATCH 
+			SET state = 4
+			WHERE id = @batch;
+
+			set @message = 'le lot est arrêté';
+			set @codeRet = 0;
+			COMMIT TRANSACTION
+		END
+	END TRY
+	BEGIN CATCH
+		set @codeRet = 3;
+		Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
+		ROLLBACK TRANSACTION
+	END CATCH
+
+RETURN @codeRet;
+
+GO
+
+-- vue donnant toutes les machines libres
+CREATE view nonBusyPresses as
+select p.id as id
+from press p
+where p.id not in (
+	select distinct press
+	from BATCH b
+	where b.state = 2
+)
+go
+
 -- saisie des mesures
 -- * par le contrôleur
 -- * crée une pièce avec les quatre mesures saisies
 
-CREATE PROCEDURE setDimensions @ht numeric, @hl numeric, @bt numeric, @bl numeric, @idBatch smallint, @message varchar(50) output
+CREATE PROCEDURE createPiece @ht numeric, @hl numeric, @bt numeric, @bl numeric, @idBatch smallint, @message varchar(50) output
 AS
 DECLARE @codeRet int;
 
@@ -236,44 +275,7 @@ RETURN @codeRet;
 GO
 
 
--- arrêt du lot
--- * par le contrôleur
--- * passage du lot en état 'arrêté' (calcul des moyennes etc.)
-alter proc stopBatch 
-						@batch smallint, -- le lot à démarrer
-						@message varchar(50) OUTPUT -- message en sortie
-AS
 
-	declare @codeRet int; 
-
-BEGIN TRANSACTION
-	BEGIN TRY
-		if @batch not in (select id from BATCH where state = 3)
-		BEGIN
-			set @message = 'le lot indiqué n''est pas en vérification';
-			set @codeRet = 1;
-			ROLLBACK TRANSACTION
-		END
-		else
-		BEGIN
-			UPDATE BATCH 
-			SET state = 4
-			WHERE id = @batch;
-
-			set @message = 'le lot est arrêté';
-			set @codeRet = 0;
-			COMMIT TRANSACTION
-		END
-	END TRY
-	BEGIN CATCH
-		set @codeRet = 3;
-		Set @message= 'erreur base de données : ' + ERROR_MESSAGE() ;
-		ROLLBACK TRANSACTION
-	END CATCH
-
-RETURN @codeRet;
-
-GO
 
 
 -- enregistrement des stocks
@@ -584,7 +586,7 @@ GO
 -- purge la base de données
 -- * par le responsable d'application
 -- * supprime les lots et pièces datant de plus d'un an
-CREATE PROCEDURE pieceCleanUp @message varchar(50) output
+CREATE PROCEDURE piecesPurge @message varchar(50) output
 AS
 DECLARE @codeRet int;
 BEGIN TRY
