@@ -9,8 +9,8 @@ GO
 use BOUM_DAY;
 go
 
-create user david from login boilleau
-create user amine from login mattar
+--create user david from login boilleau
+--create user yannick from login badaroux
 
 --LV0
 CREATE TABLE PRESS 

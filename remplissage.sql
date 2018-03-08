@@ -1,7 +1,7 @@
 
 
 -- REMPLISSAGE
-
+use BOUM_DAY
 
 INSERT PRESS
 VALUES (1)
@@ -15,7 +15,8 @@ VALUES ('R8', 70, 1)
 INSERT MODEL
 VALUES ('R12', 75, 1)
 INSERT MODEL
-VALUES ('Mégan', 80, 1)
+VALUES ('Megan', 80, 1)
+
 GO
 
 INSERT CATEGORY
@@ -43,7 +44,8 @@ VALUES('27/02/2018', 40, 2,  1, 'R8')
 INSERT BATCH
 VALUES('27/02/2018', 50, 3,  1, 'R12' )
 INSERT BATCH
-VALUES('27/02/2018', 60, 3,  1, 'Mégan' )
+VALUES('27/02/2018', 60, 3,  1, 'Megan' )
+
 GO
 
 INSERT STOCK
@@ -65,11 +67,11 @@ VALUES ('Moyen', 'R12', 40, 20)
 INSERT STOCK
 VALUES ('Grand', 'R12', 40, 30)
 INSERT STOCK
-VALUES ('Petit', 'Mégan', 30, 10)
+VALUES ('Petit', 'Megan', 30, 10)
 INSERT STOCK
-VALUES ('Moyen', 'Mégan', 30, 20)
+VALUES ('Moyen', 'Megan', 30, 20)
 INSERT STOCK
-VALUES ('Grand', 'Mégan', 30, 30)
+VALUES ('Grand', 'Megan', 30, 30)
 GO
 
 INSERT PIECE
