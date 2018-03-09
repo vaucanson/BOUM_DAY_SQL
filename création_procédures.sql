@@ -229,28 +229,28 @@ BEGIN TRANSACTION
 		if @ht = 0 or @ht is null
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Champ haut transversal manquant';
+				set @message = 'Champ haut transversal manquant ou incorrect';
 				ROLLBACK TRANSACTION
 			END
-		else if @hl = 0 or @hl is null
+		else if @hl < 0 or @hl is null
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Champ haut longitudinal manquant';
+				set @message = 'Champ haut longitudinal manquant ou incorrect';
 				ROLLBACK TRANSACTION
 			END
-		else if @bt = 0 or @bt is null
+		else if @bt < 0 or @bt is null
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Champ bas transversal manquant';
+				set @message = 'Champ bas transversal manquant ou incorrect';
 				ROLLBACK TRANSACTION
 			END
-		else if @bl = 0 or @bl is null
+		else if @bl < 0 or @bl is null
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Champ bas longitudinal manquant';
+				set @message = 'Champ bas longitudinal manquant ou incorrect';
 				ROLLBACK TRANSACTION
 			END
-		else if @idBatch = 0 or @idBatch is null
+		else if @idBatch <= 0 or @idBatch is null
 			BEGIN
 				set @codeRet = 1;
 				set @message = 'Probleme identification du lot';
@@ -289,8 +289,8 @@ GO
 
 -- enregistrement des stocks
 -- * par le magasin
--- * ajoute une caisse
-CREATE PROCEDURE addCrate @category varchar(10), @model varchar(10), @quantity smallint, @message varchar(50) output
+-- * ajoute la quantité donnée de caisses
+alter PROCEDURE addCrate @category varchar(10), @model varchar(10), @quantity smallint, @message varchar(50) output
 AS
 DECLARE @codeRet int;
 
