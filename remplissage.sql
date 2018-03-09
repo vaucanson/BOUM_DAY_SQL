@@ -1,4 +1,4 @@
-
+// hou hou le coucou
 
 -- REMPLISSAGE
 use BOUM_DAY
@@ -16,6 +16,7 @@ INSERT MODEL
 VALUES ('R12', 75, 1)
 INSERT MODEL
 VALUES ('Megan', 80, 1)
+
 GO
 
 INSERT CATEGORY
@@ -23,7 +24,7 @@ VALUES ('Petit', -0.01, -0.1)
 INSERT CATEGORY
 VALUES ('Moyen', -0.05, +0.05)
 INSERT CATEGORY
-VALUES ('Grand', +0.01, +0.1)
+VALUES ('Grand', +0.1, +0.01)
 GO
 
 INSERT INTO BATCH_STATE 
@@ -44,6 +45,7 @@ INSERT BATCH
 VALUES('27/02/2018', 50, 3,  1, 'R12' )
 INSERT BATCH
 VALUES('27/02/2018', 60, 3,  1, 'Megan' )
+
 GO
 
 INSERT STOCK

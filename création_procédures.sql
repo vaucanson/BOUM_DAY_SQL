@@ -90,7 +90,7 @@ AS
 declare @codeRet int; 
 BEGIN TRANSACTION
 	BEGIN TRY
-		if @press not in (select * from freePresses)
+		if @press not in (select * from nonBusyPresses)
 			BEGIN
 				set @message = 'la presse indiquée n''est pas libre';
 				set @codeRet = 1;
@@ -217,6 +217,8 @@ go
 -- saisie des mesures
 -- * par le contrôleur
 -- * crée une pièce avec les quatre mesures saisies
+-- * et renvoie l'id de la pièce nouvellement créée
+
 
 CREATE PROCEDURE createPiece @ht numeric, @hl numeric, @bt numeric, @bl numeric, @idBatch smallint, @message varchar(50) output
 AS
@@ -227,28 +229,28 @@ BEGIN TRANSACTION
 		if @ht = 0 or @ht is null
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Champ haut transversal manquant';
+				set @message = 'Champ haut transversal manquant ou incorrect';
 				ROLLBACK TRANSACTION
 			END
-		else if @hl = 0 or @hl is null
+		else if @hl < 0 or @hl is null
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Champ haut longitudinal manquant';
+				set @message = 'Champ haut longitudinal manquant ou incorrect';
 				ROLLBACK TRANSACTION
 			END
-		else if @bt = 0 or @bt is null
+		else if @bt < 0 or @bt is null
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Champ bas transversal manquant';
+				set @message = 'Champ bas transversal manquant ou incorrect';
 				ROLLBACK TRANSACTION
 			END
-		else if @bl = 0 or @bl is null
+		else if @bl < 0 or @bl is null
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Champ bas longitudinal manquant';
+				set @message = 'Champ bas longitudinal manquant ou incorrect';
 				ROLLBACK TRANSACTION
 			END
-		else if @idBatch = 0 or @idBatch is null
+		else if @idBatch <= 0 or @idBatch is null
 			BEGIN
 				set @codeRet = 1;
 				set @message = 'Probleme identification du lot';
@@ -256,12 +258,19 @@ BEGIN TRANSACTION
 			END
 		else
 			BEGIN
-				INSERT PIECE
-				VALUES(@ht, @hl, @bt, @bl, @idBatch)
+				-- table temporaire servant à récupérer le retour de l'insert
+				declare @tmpTable table (id int); 
 
+				INSERT PIECE
+				output inserted.id into @tmpTable
+				VALUES(@ht, @hl, @bt, @bl, @idBatch);
+				
 				set @codeRet = 0;
 				set @message = 'La piece a bien été créée';
 				COMMIT TRANSACTION
+
+				-- on affecte à @newId notre id retourné par l'insert
+				set @newId = (select id from @tmpTable);
 			END
 	END TRY
 	BEGIN CATCH
@@ -280,23 +289,35 @@ GO
 
 -- enregistrement des stocks
 -- * par le magasin
--- * ajoute une caisse
-CREATE PROCEDURE addCrate @category varchar(10), @model varchar(10), @quantity smallint, @message varchar(50) output
+-- * ajoute la quantité donnée de caisses
+alter PROCEDURE addCrate @category varchar(10), @model varchar(10), @quantity smallint, @message varchar(50) output
 AS
 DECLARE @codeRet int;
 
 BEGIN TRANSACTION 
 	BEGIN TRY
-		if @category is null or @category = '' or @category not in (select distinct name from CATEGORY)
+		if @category is null or @category = ''
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Le champ catégorie est incorrect';
+				set @message = 'Le champ catégorie doit être renseigné';
 				ROLLBACK TRANSACTION
 			END
-		else if @model = '' or @model is null or @model not in (select distinct name from model)
+		else if @category not in (select distinct name from CATEGORY)
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Le champ modèle est incorrect';
+				set @message = 'la catégorie '+ @category +' n''existe pas';
+				ROLLBACK TRANSACTION
+			END
+		else if @model = '' or @model is null
+			BEGIN
+				set @codeRet = 1;
+				set @message = 'Le champ modèle doit être renseigné';
+				ROLLBACK TRANSACTION
+			END
+		else if @model not in (select distinct name from model)
+			BEGIN
+				set @codeRet = 1;
+				set @message = 'Le modèle ' + @model + ' n''existe pas';
 				ROLLBACK TRANSACTION
 			END
 		else if @quantity = 0 or @quantity is null
@@ -338,13 +359,25 @@ BEGIN TRANSACTION
 		if @category is null or @category = ''
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Le champ catégorie est incorrect';
+				set @message = 'Le champ catégorie doit être renseigné';
+				ROLLBACK TRANSACTION
+			END
+		else if @category not in (select distinct name from CATEGORY)
+			BEGIN
+				set @codeRet = 1;
+				set @message = 'la catégorie '+ @category +' n''existe pas';
 				ROLLBACK TRANSACTION
 			END
 		else if @model = '' or @model is null
 			BEGIN
 				set @codeRet = 1;
-				set @message = 'Le champ modèle est incorrect';
+				set @message = 'Le champ modèle doit être renseigné';
+				ROLLBACK TRANSACTION
+			END
+		else if @model not in (select distinct name from model)
+			BEGIN
+				set @codeRet = 1;
+				set @message = 'Le modèle ' + @model + ' n''existe pas';
 				ROLLBACK TRANSACTION
 			END
 		else if @quantity = 0 or @quantity is null
@@ -354,7 +387,6 @@ BEGIN TRANSACTION
 				ROLLBACK TRANSACTION
 			END
 		else
-			BEGIN
 				UPDATE STOCK
 				SET quantity -= @quantity
 				WHERE category = @category and model = @model
@@ -460,6 +492,12 @@ BEGIN TRANSACTION
 				set @message = 'Le champ nom est incorrect.';
 				ROLLBACK TRANSACTION
 			END
+		else if @name not in (select distinct name from model)
+			BEGIN
+				set @codeRet = 1;
+				set @message = 'le nom ' + @name + ' n''existe pas';
+				ROLLBACK TRANSACTION
+			END
 		else
 			BEGIN
 				UPDATE MODEL
@@ -542,21 +580,30 @@ AS
 	declare @codeRet int;
 
 BEGIN TRY
-	if @model is null or @model = '' or @model not in (select name from model)
-	BEGIN
-		set @message = 'Le modèle doit être renseigné';
-		set @codeRet = 1;
-	END
-	else if @category is null or @category = '' or @category not in (select name from CATEGORY)
-	BEGIN
-		set @message = 'La catégorie doit être renseignée';
-		set @codeRet = 1;
-	END
-	else if @category is null or @category = ''
-	BEGIN
-		set @message = 'La catégorie doit être renseignée';
-		set @codeRet = 1;
-	END
+	if @category is null or @category = ''
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Le champ catégorie doit être renseigné';
+			ROLLBACK TRANSACTION
+		END
+	else if @category not in (select distinct name from CATEGORY)
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'la catégorie '+ @category +' n''existe pas';
+			ROLLBACK TRANSACTION
+		END
+	else if @model = '' or @model is null
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Le champ modèle doit être renseigné';
+			ROLLBACK TRANSACTION
+		END
+	else if @model not in (select distinct name from model)
+		BEGIN
+			set @codeRet = 1;
+			set @message = 'Le modèle ' + @model + ' n''existe pas';
+			ROLLBACK TRANSACTION
+		END
 	else if @limit < 0
 	BEGIN
 		set @message = 'La limite doit être positive';
@@ -656,3 +703,15 @@ BEGIN CATCH
 END CATCH
 
 GO
+
+
+-- Table de tous les rôles. Pour chaque rôle, renvoie 1 si l'utilisateur courant appartient à ce rôle, 0 sinon
+create view getRoles as
+select
+case when (IS_ROLEMEMBER ('applicationHeadOf') = 1)  then 1 else 0 end as applicationHeadOf,
+case when (IS_ROLEMEMBER ('productionHeadOf') = 1)  then 1 else 0 end as productionHeadOf,
+case when (IS_ROLEMEMBER ('workshopHeadOf') = 1)  then 1 else 0 end as workshopHeadOf,
+case when (IS_ROLEMEMBER ('controller') = 1)  then 1 else 0 end as controller,
+case when (IS_ROLEMEMBER ('storeKeeper') = 1)  then 1 else 0 end as storeKeeper,
+case when (IS_ROLEMEMBER ('qualityHeadOf') = 1)  then 1 else 0 end as qualityHeadOf
+go
