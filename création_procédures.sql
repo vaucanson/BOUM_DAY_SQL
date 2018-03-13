@@ -480,7 +480,7 @@ GO
 -- Suppression de modèle
 -- * par le responsable d'application
 -- * supprime un modèle
-CREATE PROCEDURE removeModel @name varchar(5), @message varchar(50) output
+alter PROCEDURE removeModel @name varchar(5), @message varchar(50) output
 AS
 DECLARE @codeRet int;
 
@@ -498,13 +498,19 @@ BEGIN TRANSACTION
 				set @message = 'le nom ' + @name + ' n''existe pas';
 				ROLLBACK TRANSACTION
 			END
+		else if 1 not in (select active from model where name=@name)
+			BEGIN
+				set @codeRet = 2;
+				set @message = 'le modèle '+  @name + ' est déjà supprimé';
+				ROLLBACK TRANSACTION
+			END
 		else
 			BEGIN
 				UPDATE MODEL
 				SET active = 0
 				WHERE name = @name
 			
-				SET @codeRet = 1;
+				SET @codeRet = 0;
 				SET @message = 'Le modèle a bien été retiré.';
 				COMMIT TRANSACTION
 			END
