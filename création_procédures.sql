@@ -211,6 +211,7 @@ where p.id not in (
 	select distinct press
 	from BATCH b
 	where b.state = 2
+	and p.active = 1
 )
 go
 
@@ -461,7 +462,7 @@ BEGIN TRANSACTION
 				INSERT STOCK
 				VALUES ('Grand', @name, @bigMin, 0);
 			
-				SET @codeRet = 1;
+				SET @codeRet = 0;
 				SET @message = 'Le nouveau modèle a bien été ajouté.';
 				COMMIT TRANSACTION
 			END
