@@ -204,13 +204,14 @@ RETURN @codeRet;
 GO
 
 -- vue donnant toutes les machines libres
-CREATE view nonBusyPresses as
+ALTER view nonBusyPresses as
 select p.id as id
 from press p
 where p.id not in (
 	select distinct press
 	from BATCH b
-	where b.state = 2
+	where b.state = 2 
+	and p.active = 1
 )
 go
 
