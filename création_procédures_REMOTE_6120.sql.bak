@@ -17,17 +17,6 @@ select
 			0 
 		end as isLimitReached
 from stock 
-inner join model on model.name = stock.model
-where model.active = 1
-go
-
-create view fullStock as
-select 
-	STOCK.model, 
-	STOCK.category,
-	STOCK.quantity,
-	STOCK.limit
-from stock 
 go
 
 
@@ -215,18 +204,13 @@ RETURN @codeRet;
 GO
 
 -- vue donnant toutes les machines libres
-<<<<<<< HEAD
-ALTER view nonBusyPresses as
-=======
 alter view nonBusyPresses as
->>>>>>> 5cf7db74b69523f2b41a1f534d2ff925a2e36343
 select p.id as id
 from press p
 where p.id not in (
 	select distinct press
 	from BATCH b
-	where b.state = 2 
-	and p.active = 1
+	where b.state = 2
 )
 and p.active = 1
 go
@@ -438,12 +422,6 @@ BEGIN TRANSACTION
 			BEGIN
 				set @codeRet = 1;
 				set @message = 'Le champ nom est incorrect';
-				ROLLBACK TRANSACTION
-			END
-		else if  @name in (SELECT name from model)
-			BEGIN
-				set @codeRet = 1;
-				set @message = 'Le nom existe déjà';
 				ROLLBACK TRANSACTION
 			END
 		else if @diameter = 0 or @diameter is null
