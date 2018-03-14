@@ -17,17 +17,6 @@ select
 			0 
 		end as isLimitReached
 from stock 
-inner join model on model.name = stock.model
-where model.active = 1
-go
-
-create view fullStock as
-select 
-	STOCK.model, 
-	STOCK.category,
-	STOCK.quantity,
-	STOCK.limit
-from stock 
 go
 
 
@@ -215,16 +204,15 @@ RETURN @codeRet;
 GO
 
 -- vue donnant toutes les machines libres
--- càd qui sont actives et sur lesquelles aucun batch en état 2 ne pointe
-alter view nonBusyPresses as
+ALTER view nonBusyPresses as
 select p.id as id
 from press p
 where p.id not in (
 	select distinct press
 	from BATCH b
-	where b.state = 2
+	where b.state = 2 
+	and p.active = 1
 )
-and p.active = 1
 go
 
 -- saisie des mesures
@@ -436,12 +424,6 @@ BEGIN TRANSACTION
 				set @message = 'Le champ nom est incorrect';
 				ROLLBACK TRANSACTION
 			END
-		else if  @name in (SELECT name from model)
-			BEGIN
-				set @codeRet = 1;
-				set @message = 'Le nom existe déjà';
-				ROLLBACK TRANSACTION
-			END
 		else if @diameter = 0 or @diameter is null
 			BEGIN
 				set @codeRet = 1;
@@ -480,7 +462,7 @@ BEGIN TRANSACTION
 				INSERT STOCK
 				VALUES ('Grand', @name, @bigMin, 0);
 			
-				SET @codeRet = 0;
+				SET @codeRet = 1;
 				SET @message = 'Le nouveau modèle a bien été ajouté.';
 				COMMIT TRANSACTION
 			END
@@ -499,7 +481,7 @@ GO
 -- Suppression de modèle
 -- * par le responsable d'application
 -- * supprime un modèle
-alter PROCEDURE removeModel @name varchar(5), @message varchar(50) output
+CREATE PROCEDURE removeModel @name varchar(5), @message varchar(50) output
 AS
 DECLARE @codeRet int;
 
@@ -517,19 +499,13 @@ BEGIN TRANSACTION
 				set @message = 'le nom ' + @name + ' n''existe pas';
 				ROLLBACK TRANSACTION
 			END
-		else if 1 not in (select active from model where name=@name)
-			BEGIN
-				set @codeRet = 2;
-				set @message = 'le modèle '+  @name + ' est déjà supprimé';
-				ROLLBACK TRANSACTION
-			END
 		else
 			BEGIN
 				UPDATE MODEL
 				SET active = 0
 				WHERE name = @name
 			
-				SET @codeRet = 0;
+				SET @codeRet = 1;
 				SET @message = 'Le modèle a bien été retiré.';
 				COMMIT TRANSACTION
 			END
