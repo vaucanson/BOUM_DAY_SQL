@@ -204,7 +204,11 @@ RETURN @codeRet;
 GO
 
 -- vue donnant toutes les machines libres
+<<<<<<< HEAD
 ALTER view nonBusyPresses as
+=======
+alter view nonBusyPresses as
+>>>>>>> 5cf7db74b69523f2b41a1f534d2ff925a2e36343
 select p.id as id
 from press p
 where p.id not in (
@@ -213,6 +217,7 @@ where p.id not in (
 	where b.state = 2 
 	and p.active = 1
 )
+and p.active = 1
 go
 
 -- saisie des mesures
@@ -462,7 +467,7 @@ BEGIN TRANSACTION
 				INSERT STOCK
 				VALUES ('Grand', @name, @bigMin, 0);
 			
-				SET @codeRet = 1;
+				SET @codeRet = 0;
 				SET @message = 'Le nouveau modèle a bien été ajouté.';
 				COMMIT TRANSACTION
 			END
@@ -481,7 +486,7 @@ GO
 -- Suppression de modèle
 -- * par le responsable d'application
 -- * supprime un modèle
-CREATE PROCEDURE removeModel @name varchar(5), @message varchar(50) output
+alter PROCEDURE removeModel @name varchar(5), @message varchar(50) output
 AS
 DECLARE @codeRet int;
 
@@ -499,13 +504,19 @@ BEGIN TRANSACTION
 				set @message = 'le nom ' + @name + ' n''existe pas';
 				ROLLBACK TRANSACTION
 			END
+		else if 1 not in (select active from model where name=@name)
+			BEGIN
+				set @codeRet = 2;
+				set @message = 'le modèle '+  @name + ' est déjà supprimé';
+				ROLLBACK TRANSACTION
+			END
 		else
 			BEGIN
 				UPDATE MODEL
 				SET active = 0
 				WHERE name = @name
 			
-				SET @codeRet = 1;
+				SET @codeRet = 0;
 				SET @message = 'Le modèle a bien été retiré.';
 				COMMIT TRANSACTION
 			END
