@@ -17,17 +17,6 @@ select
 			0 
 		end as isLimitReached
 from stock 
-inner join model on model.name = stock.model
-where model.active = 1
-go
-
-create view fullStock as
-select 
-	STOCK.model, 
-	STOCK.category,
-	STOCK.quantity,
-	STOCK.limit
-from stock 
 go
 
 
@@ -438,12 +427,6 @@ BEGIN TRANSACTION
 			BEGIN
 				set @codeRet = 1;
 				set @message = 'Le champ nom est incorrect';
-				ROLLBACK TRANSACTION
-			END
-		else if  @name in (SELECT name from model)
-			BEGIN
-				set @codeRet = 1;
-				set @message = 'Le nom existe déjà';
 				ROLLBACK TRANSACTION
 			END
 		else if @diameter = 0 or @diameter is null
