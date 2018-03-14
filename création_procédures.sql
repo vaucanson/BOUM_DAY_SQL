@@ -204,6 +204,7 @@ RETURN @codeRet;
 GO
 
 -- vue donnant toutes les machines libres
+-- càd qui sont actives et sur lesquelles aucun batch en état 2 ne pointe
 alter view nonBusyPresses as
 select p.id as id
 from press p
