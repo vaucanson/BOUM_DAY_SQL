@@ -303,7 +303,7 @@ GO
 -- enregistrement des stocks
 -- * par le magasin
 -- * ajoute la quantité donnée de caisses
-alter PROCEDURE addCrate @category varchar(10), @model varchar(10), @quantity smallint, @message varchar(50) output
+create PROCEDURE addCrate @category varchar(10), @model varchar(10), @quantity smallint, @message varchar(50) output
 AS
 DECLARE @codeRet int;
 
@@ -499,7 +499,7 @@ GO
 -- Suppression de modèle
 -- * par le responsable d'application
 -- * supprime un modèle
-alter PROCEDURE removeModel @name varchar(5), @message varchar(50) output
+create PROCEDURE removeModel @name varchar(5), @message varchar(50) output
 AS
 DECLARE @codeRet int;
 
