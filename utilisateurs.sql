@@ -75,4 +75,12 @@ alter role everyBody add member user_resp_qualit1;
 alter role everyBody add member user_resp_qualit2;
 
 
--- POUR NOS TESTS
+-- AJOUT DES DROITS SUR LES TABLES 
+
+grant SELECT on model to workshopHeadOf;
+grant SELECT on model to applicationHeadOf;
+grant SELECT on batch to controller;
+grant SELECT on model to controller;
+grant SELECT on fullStock to storeKeeper;
+grant SELECT on model to storeKeeper;
+
